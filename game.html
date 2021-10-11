@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<b><i> Let's Ping-Pong ? </b></i>
+
+<canvas id="gameCanvas" width="800" height="600"></canvas>
+
+<script>	
+var canvas;
+var canvasContext;
+var balleX = 10;
+var balleY = 10;
+var balleVitesseX = 10;
+var balleVitesseY = 4;
+
+var player1Score = 0;
+var player2Score = 0;
+const WINNING_SCORE = 3;
+
+var showingWinScreen = false;
+
+var raquette1Y = 250;
+var raquette2Y = 250;
+const RAQUETTE_THICKNESS = 10;
+const RAQUETTE_HEIGHT = 100;
+
+function calculateMousePos(evt) {
+	var rect = canvas.getBoundingClientRect();
+	var root = document.documentElement;
+	var mouseX = evt.clientX - rect.left - root.scrollLeft;
+	var mouseY = evt.clientY - rect.top - root.scrollTop;
+	return {
+		x:mouseX,
+		y:mouseY
+	};
+}
+
+function handleMouseClick(evt) {
+	if(showingWinScreen) {
+		player1Score = 0;
+		player2Score = 0;
+		showingWinScreen = false;
+	}
+}
+
+window.onload = function() {
+	canvas = document.getElementById('gameCanvas');
+	canvasContext = canvas.getContext('2d');
+	
+	var framesPerSecond = 30;
+	setInterval(function() {
+		moveEverything();
+		drawEverything();	
+	}, 1000/framesPerSecond );
+
+	canvas.addEventListener('mousedown',handleMouseClick);
+	
+	canvas.addEventListener('mousemove',
+		function(evt) {
+			var mousePos = calculateMousePos(evt);
+			raquette1Y = mousePos.y-(RAQUETTE_HEIGHT/2);
+		});
+}
+
+function ballreset() {
+	if(player1Score >= WINNING_SCORE ||
+	   player2Score >= WINNING_SCORE) {
+		showingWinScreen = true;
+		
+}
+
+	balleVitesseX = -balleVitesseX;
+	balleX = canvas.width/2;
+	balleY = canvas.height/2;
+}
+
+function computerMovement() {
+	var raquette2YCenter = raquette2Y + (RAQUETTE_HEIGHT/2);
+	if(raquette2YCenter < balleY-35) {
+		raquette2Y += 6;
+	} else if(raquette2YCenter > balleY+35) {
+		raquette2Y -= 6;
+	}
+}
+
+function moveEverything() {
+	if(showingWinScreen) {
+		return;
+	}
+	computerMovement();	
+
+
+	// this line updates the ball movement horizontally after each interval
+	balleX += balleVitesseX;
+	if(balleX > canvas.width) {
+		if(balleY > raquette2Y &&
+		  	balleY < raquette2Y+RAQUETTE_HEIGHT) {
+			balleVitesseX = -balleVitesseX;
+			var deltaY = balleY - (raquette2Y+RAQUETTE_HEIGHT/2);
+			balleVitesseY = deltaY * 0.35;
+		} else { 
+			player1Score++; // must BEFORE ballreset()
+			ballreset();
+			
+	}
+}
+	if(balleX < 0) {
+		if(balleY > raquette1Y &&
+			balleY < raquette1Y+RAQUETTE_HEIGHT) {
+			balleVitesseX = -balleVitesseX;
+
+			var deltaY = balleY - (raquette1Y+RAQUETTE_HEIGHT/2);
+			balleVitesseY = deltaY * 0.35;
+		} else { 
+			player2Score++; // must BEFORE ballreset()
+			ballreset();
+		}	
+}
+
+	// this line updates the ball movement vertically after each interval
+	balleY += balleVitesseY;
+	if(balleY > canvas.height) {
+		balleVitesseY = -balleVitesseY;
+	}
+	if(balleY < 0) {
+		balleVitesseY = -balleVitesseY;
+	}
+}
+
+function drawNet() {
+	for(var i=0;i<canvas.height; i+=40) {
+		colorRect(canvas.width/2-1,i,2,20,'white');
+}}
+
+function drawEverything() {
+	// next line colors the screen in green
+	colorRect(0,0,canvas.width,canvas.height,'green');
+	
+	if(showingWinScreen) {
+		canvasContext.fillStyle = "yellow";
+		
+		if(player1Score >= WINNING_SCORE) {
+			canvasContext.fillText("Jogador 1 VENCEU!", 350, 200);
+		} else if(player2Score >= WINNING_SCORE) {
+			canvasContext.fillText("Jogador 2 VENCEU!", 350, 200);
+		
+		}
+			canvasContext.fillText("Clique para Continuar!", 350, 350);
+			return;
+		}
+
+	
+	drawNet();
+	
+	// this paddle is for the player on the left
+	colorRect(0,raquette1Y,RAQUETTE_THICKNESS,RAQUETTE_HEIGHT,'red');
+	
+	// this paddle is for the player on the right
+	colorRect(canvas.width-RAQUETTE_THICKNESS,raquette2Y,
+		RAQUETTE_THICKNESS,RAQUETTE_HEIGHT,'blue');
+
+	// this one designs the moving balls
+	// comment faire pour que la moitié noire touche la paroi latérale et revienne
+	colorCircle(balleX, balleY, 10, 'yellow')
+	colorCircle2(balleX, balleY, 10, 'black')
+
+	canvasContext.fillText(player1Score, 100, 100);
+	canvasContext.fillText(player2Score, canvas.width-100, 100);
+}
+
+function colorCircle(centreX, centreY, radius, drawColor) {
+	canvasContext.fillStyle = drawColor;
+	canvasContext.beginPath();
+	canvasContext.arc(centreX, centreY, radius, 0, Math.PI, true);
+	canvasContext.fill();
+}
+
+function colorCircle2(centreX, centreY, radius, drawColor) {
+	canvasContext.fillStyle = drawColor;
+	canvasContext.beginPath();
+	canvasContext.arc(centreX, centreY, radius, 0, Math.PI, false);
+	canvasContext.fill(); 
+}
+
+function colorRect(leftx, topy, width, height, drawColor) {
+	canvasContext.fillStyle = drawColor;
+	canvasContext.fillRect(leftx, topy, width, height);
+}
+
+</script>
+
+</!DOCTYPE html>
