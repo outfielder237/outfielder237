@@ -1,5 +1,5 @@
 - 👋 Hi, I’m @outfielder237.
-- 👀 I’m interested in coding and developing coding related skills.
+- 👀 I’m an actuary interested in coding and developing coding related skills.
 - 💞️ I’m looking to collaborate on a wide array of projects, since I'm mostly focusing in learning for now.  
 - 📫 How to reach me : cdrx10@gmx.us
 
